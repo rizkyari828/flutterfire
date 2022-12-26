@@ -154,33 +154,37 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
               null,
               mainHandler,
               () -> {
-                String appBundlePath = loader.findAppBundlePath();
-                AssetManager assets = ContextHolder.getApplicationContext().getAssets();
-                if (isNotRunning()) {
-                  if (shellArgs != null) {
-                    Log.i(
+                try {
+                  String appBundlePath = loader.findAppBundlePath();
+                  AssetManager assets = ContextHolder.getApplicationContext().getAssets();
+                  if (isNotRunning()) {
+                    if (shellArgs != null) {
+                      Log.i(
                         TAG,
                         "Creating background FlutterEngine instance, with args: "
-                            + Arrays.toString(shellArgs.toArray()));
-                    backgroundFlutterEngine =
+                          + Arrays.toString(shellArgs.toArray()));
+                      backgroundFlutterEngine =
                         new FlutterEngine(
-                            ContextHolder.getApplicationContext(), shellArgs.toArray());
-                  } else {
-                    Log.i(TAG, "Creating background FlutterEngine instance.");
-                    backgroundFlutterEngine =
+                          ContextHolder.getApplicationContext(), shellArgs.toArray());
+                    } else {
+                      Log.i(TAG, "Creating background FlutterEngine instance.");
+                      backgroundFlutterEngine =
                         new FlutterEngine(ContextHolder.getApplicationContext());
-                  }
-                  // We need to create an instance of `FlutterEngine` before looking up the
-                  // callback. If we don't, the callback cache won't be initialized and the
-                  // lookup will fail.
-                  FlutterCallbackInformation flutterCallback =
+                    }
+                    // We need to create an instance of `FlutterEngine` before looking up the
+                    // callback. If we don't, the callback cache won't be initialized and the
+                    // lookup will fail.
+                    FlutterCallbackInformation flutterCallback =
                       FlutterCallbackInformation.lookupCallbackInformation(callbackHandle);
-                  DartExecutor executor = backgroundFlutterEngine.getDartExecutor();
-                  initializeMethodChannel(executor);
-                  DartCallback dartCallback =
+                    DartExecutor executor = backgroundFlutterEngine.getDartExecutor();
+                    initializeMethodChannel(executor);
+                    DartCallback dartCallback =
                       new DartCallback(assets, appBundlePath, flutterCallback);
 
-                  executor.executeDartCallback(dartCallback);
+                    executor.executeDartCallback(dartCallback);
+                  }
+                } catch (Exception exception) {
+                  Log.e(TAG, "Start Background Isolate Error", exception);
                 }
               });
         };
