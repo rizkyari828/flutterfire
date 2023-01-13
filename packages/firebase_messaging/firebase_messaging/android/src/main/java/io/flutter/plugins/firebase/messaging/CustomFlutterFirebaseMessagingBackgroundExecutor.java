@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * An background execution abstraction which handles initializing a background isolate running a
  * callback dispatcher, used to invoke Dart callbacks while backgrounded.
  */
-public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHandler {
+public class CustomFlutterFirebaseMessagingBackgroundExecutor implements MethodCallHandler {
   private static final String TAG = "FLTFireBGExecutor";
   private static final String CALLBACK_HANDLE_KEY = "callback_handle";
   private static final String USER_CALLBACK_HANDLE_KEY = "user_callback_handle";

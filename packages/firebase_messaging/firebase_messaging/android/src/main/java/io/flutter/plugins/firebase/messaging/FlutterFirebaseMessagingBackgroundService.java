@@ -23,7 +23,7 @@ public class FlutterFirebaseMessagingBackgroundService extends JobIntentService 
       Collections.synchronizedList(new LinkedList<>());
 
   /** Background Dart execution context. */
-  private static FlutterFirebaseMessagingBackgroundExecutor flutterBackgroundExecutor;
+  private static CustomFlutterFirebaseMessagingBackgroundExecutor flutterBackgroundExecutor;
 
   /**
    * Schedule the message to be handled by the {@link FlutterFirebaseMessagingBackgroundService}.
@@ -57,7 +57,7 @@ public class FlutterFirebaseMessagingBackgroundService extends JobIntentService 
       Log.w(TAG, "Attempted to start a duplicate background isolate. Returning...");
       return;
     }
-    flutterBackgroundExecutor = new FlutterFirebaseMessagingBackgroundExecutor();
+    flutterBackgroundExecutor = new CustomFlutterFirebaseMessagingBackgroundExecutor();
     flutterBackgroundExecutor.startBackgroundIsolate(callbackHandle, shellArgs);
   }
 
@@ -86,7 +86,7 @@ public class FlutterFirebaseMessagingBackgroundService extends JobIntentService 
    * background Dart isolate, preparing it to receive Dart callback tasks requests.
    */
   public static void setCallbackDispatcher(long callbackHandle) {
-    FlutterFirebaseMessagingBackgroundExecutor.setCallbackDispatcher(callbackHandle);
+    CustomFlutterFirebaseMessagingBackgroundExecutor.setCallbackDispatcher(callbackHandle);
   }
 
   /**
@@ -94,14 +94,14 @@ public class FlutterFirebaseMessagingBackgroundService extends JobIntentService 
    * messaging events in the background.
    */
   public static void setUserCallbackHandle(long callbackHandle) {
-    FlutterFirebaseMessagingBackgroundExecutor.setUserCallbackHandle(callbackHandle);
+    CustomFlutterFirebaseMessagingBackgroundExecutor.setUserCallbackHandle(callbackHandle);
   }
 
   @Override
   public void onCreate() {
     super.onCreate();
     if (flutterBackgroundExecutor == null) {
-      flutterBackgroundExecutor = new FlutterFirebaseMessagingBackgroundExecutor();
+      flutterBackgroundExecutor = new CustomFlutterFirebaseMessagingBackgroundExecutor();
     }
     flutterBackgroundExecutor.startBackgroundIsolate();
   }
