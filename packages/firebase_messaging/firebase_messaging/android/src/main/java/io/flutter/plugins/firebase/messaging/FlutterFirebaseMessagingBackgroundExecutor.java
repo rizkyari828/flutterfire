@@ -113,9 +113,13 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
    */
   public void startBackgroundIsolate() {
     if (isNotRunning()) {
-      long callbackHandle = getPluginCallbackHandle();
-      if (callbackHandle != 0) {
-        startBackgroundIsolate(callbackHandle, null);
+      try {
+        long callbackHandle = getPluginCallbackHandle();
+        if (callbackHandle != 0) {
+          startBackgroundIsolate(callbackHandle, null);
+        }
+      } catch (Exception exception) {
+        Log.e(TAG, "Start Background Isolate Error", exception);
       }
     }
   }
@@ -202,16 +206,17 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
    * corresponds to a callback registered with the Dart VM.
    */
   public void executeDartCallbackInBackgroundIsolate(Intent intent, final CountDownLatch latch) {
-    if (backgroundFlutterEngine == null) {
-      Log.i(
+    try {
+      if (backgroundFlutterEngine == null) {
+        Log.i(
           TAG,
           "A background message could not be handled in Dart as no onBackgroundMessage handler has been registered.");
-      return;
-    }
+        return;
+      }
 
-    Result result = null;
-    if (latch != null) {
-      result =
+      Result result = null;
+      if (latch != null) {
+        result =
           new Result() {
             @Override
             public void success(Object result) {
@@ -229,15 +234,15 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
               latch.countDown();
             }
           };
-    }
+      }
 
-    // Handle the message event in Dart.
-    RemoteMessage remoteMessage =
+      // Handle the message event in Dart.
+      RemoteMessage remoteMessage =
         intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
-    if (remoteMessage != null) {
-      Map<String, Object> remoteMessageMap =
+      if (remoteMessage != null) {
+        Map<String, Object> remoteMessageMap =
           FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
-      backgroundChannel.invokeMethod(
+        backgroundChannel.invokeMethod(
           "MessagingBackground#onMessage",
           new HashMap<String, Object>() {
             {
@@ -246,8 +251,11 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
             }
           },
           result);
-    } else {
-      Log.e(TAG, "RemoteMessage instance not found in Intent.");
+      } else {
+        Log.e(TAG, "RemoteMessage instance not found in Intent.");
+      }
+    } catch (Exception exception) {
+
     }
   }
 
