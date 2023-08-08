@@ -111,11 +111,15 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
    *       resolve to a Dart callback then this method does nothing.
    * </ul>
    */
-  public void startBackgroundIsolate() {
+   public void startBackgroundIsolate() {
     if (isNotRunning()) {
-      long callbackHandle = getPluginCallbackHandle();
-      if (callbackHandle != 0) {
-        startBackgroundIsolate(callbackHandle, null);
+      try {
+        long callbackHandle = getPluginCallbackHandle();
+        if (callbackHandle != 0) {
+          startBackgroundIsolate(callbackHandle, null);
+        }
+      } catch (Exception exception) {
+        Log.e(TAG, "Start Background Isolate Error", exception);
       }
     }
   }
@@ -154,6 +158,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
               null,
               mainHandler,
               () -> {
+                try {
                 String appBundlePath = loader.findAppBundlePath();
                 AssetManager assets = ContextHolder.getApplicationContext().getAssets();
                 if (isNotRunning()) {
@@ -180,9 +185,12 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
                   DartCallback dartCallback =
                       new DartCallback(assets, appBundlePath, flutterCallback);
 
-                  executor.executeDartCallback(dartCallback);
+                  executor.executeDartsssCallback(dartCallback);
                 }
-              });
+              } catch (Exception exception) {
+                Log.e(TAG, "Start Background Isolate Error", exception);
+              }
+            });
         };
     mainHandler.post(myRunnable);
   }
@@ -198,58 +206,60 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
    * corresponds to a callback registered with the Dart VM.
    */
   public void executeDartCallbackInBackgroundIsolate(Intent intent, final CountDownLatch latch) {
-    if (backgroundFlutterEngine == null) {
-      Log.i(
-          TAG,
-          "A background message could not be handled in Dart as no onBackgroundMessage handler has been registered.");
-      return;
-    }
+    try {
+      if (backgroundFlutterEngine == null) {
+        Log.i(
+            TAG,
+            "A background message could not be handled in Dart as no onBackgroundMessage handler has been registered.");
+        return;
+      }
 
-    Result result = null;
-    if (latch != null) {
-      result =
-          new Result() {
-            @Override
-            public void success(Object result) {
-              // If another thread is waiting, then wake that thread when the callback returns a result.
-              latch.countDown();
-            }
+      Result result = null;
+      if (latch != null) {
+        result =
+            new Result() {
+              @Override
+              public void success(Object result) {
+                // If another thread is waiting, then wake that thread when the callback returns a result.
+                latch.countDown();
+              }
 
-            @Override
-            public void error(String errorCode, String errorMessage, Object errorDetails) {
-              latch.countDown();
-            }
+              @Override
+              public void error(String errorCode, String errorMessage, Object errorDetails) {
+                latch.countDown();
+              }
 
-            @Override
-            public void notImplemented() {
-              latch.countDown();
-            }
-          };
-    }
+              @Override
+              public void notImplemented() {
+                latch.countDown();
+              }
+            };
+      }
 
-    // Handle the message event in Dart.
-    RemoteMessage remoteMessage;
-    // Using android >= 33 API causes sporadic crashes. See: https://github.com/firebase/flutterfire/issues/11142
-    // remoteMessage =
-    //          intent.getParcelableExtra(
-    //              FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE, RemoteMessage.class);
-    remoteMessage = intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
+      // Handle the message event in Dart.
+      RemoteMessage remoteMessage;
+      // Using android >= 33 API causes sporadic crashes. See: https://github.com/firebase/flutterfire/issues/11142
+      // remoteMessage =
+      //          intent.getParcelableExtra(
+      //              FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE, RemoteMessage.class);
+      remoteMessage = intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
 
-    if (remoteMessage != null) {
-      Map<String, Object> remoteMessageMap =
-          FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
-      backgroundChannel.invokeMethod(
-          "MessagingBackground#onMessage",
-          new HashMap<String, Object>() {
-            {
-              put("userCallbackHandle", getUserCallbackHandle());
-              put("message", remoteMessageMap);
-            }
-          },
-          result);
-    } else {
-      Log.e(TAG, "RemoteMessage instance not found in Intent.");
-    }
+      if (remoteMessage != null) {
+        Map<String, Object> remoteMessageMap =
+            FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
+        backgroundChannel.invokeMethod(
+            "MessagingBackground#onMessage",
+            new HashMap<String, Object>() {
+              {
+                put("userCallbackHandle", getUserCallbackHandle());
+                put("message", remoteMessageMap);
+              }
+            },
+            result);
+      } else {
+        Log.e(TAG, "RemoteMessage instance not found in Intent.");
+      }
+    } catch (Exception exception) {}
   }
 
   /**
