@@ -185,7 +185,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
                   DartCallback dartCallback =
                       new DartCallback(assets, appBundlePath, flutterCallback);
 
-                  executor.executeDartsssCallback(dartCallback);
+                  executor.executeDartCallback(dartCallback);
                 }
               } catch (Exception exception) {
                 Log.e(TAG, "Start Background Isolate Error", exception);
