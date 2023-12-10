@@ -1,3 +1,55 @@
+## 0.5.5+11
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+10
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+9
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+8
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+7
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+6
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+5
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+4
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+3
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+2
+
+ - Update a dependency to the latest release.
+
+## 0.5.5+1
+
+ - Update a dependency to the latest release.
+
+## 0.5.5
+
+ - **FEAT**(firebase_analytics): support `getSessionId` for android and apple platforms ([#11478](https://github.com/firebase/flutterfire/issues/11478)). ([13aaf03d](https://github.com/firebase/flutterfire/commit/13aaf03dc2050514cea97023fae5c27491bcac8a))
+
+## 0.5.4+5
+
+ - Update a dependency to the latest release.
+
 ## 0.5.4+4
 
  - Update a dependency to the latest release.

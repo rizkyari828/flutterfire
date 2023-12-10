@@ -76,7 +76,7 @@ class MethodChannelFirebaseAppCheck extends FirebaseAppCheckPlatform {
 
   @override
   Future<void> activate({
-    String? webRecaptchaSiteKey,
+    WebProvider? webProvider,
     AndroidProvider? androidProvider,
     AppleProvider? appleProvider,
   }) async {
@@ -117,7 +117,7 @@ class MethodChannelFirebaseAppCheck extends FirebaseAppCheckPlatform {
         'FirebaseAppCheck#setTokenAutoRefreshEnabled',
         {
           'appName': app.name,
-          'isTokenAutoRefreshEnabled': isTokenAutoRefreshEnabled
+          'isTokenAutoRefreshEnabled': isTokenAutoRefreshEnabled,
         },
       );
     } on PlatformException catch (e, s) {

@@ -20,31 +20,7 @@ import 'utils/utils.dart';
 export 'auth_interop.dart';
 
 /// Given an AppJSImp, return the Auth instance.
-Auth getAuthInstance(App app, {Persistence? persistence}) {
-  if (persistence != null) {
-    auth_interop.Persistence setPersistence;
-    switch (persistence) {
-      case Persistence.LOCAL:
-        setPersistence = auth_interop.browserLocalPersistence;
-        break;
-      case Persistence.INDEXED_DB:
-        setPersistence = auth_interop.indexedDBLocalPersistence;
-        break;
-      case Persistence.SESSION:
-        setPersistence = auth_interop.browserSessionPersistence;
-        break;
-      case Persistence.NONE:
-        setPersistence = auth_interop.inMemoryPersistence;
-        break;
-    }
-    return Auth.getInstance(auth_interop.initializeAuth(
-        app.jsObject,
-        jsify({
-          'errorMap': auth_interop.debugErrorMap,
-          'persistence': setPersistence,
-          'popupRedirectResolver': auth_interop.browserPopupRedirectResolver
-        })));
-  }
+Auth getAuthInstance(App app) {
   return Auth.getInstance(auth_interop.initializeAuth(
       app.jsObject,
       jsify({
@@ -711,7 +687,7 @@ class Auth extends JsObjectWrapper<auth_interop.AuthJsImpl> {
       auth_interop.connectAuthEmulator(jsObject, origin);
 
   /// Sets the current language to the default device/browser preference.
-  void useDeviceLanguage() => jsObject.useDeviceLanguage();
+  void useDeviceLanguage() => auth_interop.useDeviceLanguage(jsObject);
 
   /// Verifies a password reset [code] sent to the user by email
   /// or other out-of-band mechanism.
@@ -1077,9 +1053,9 @@ class RecaptchaVerifier
       container, Map<String, dynamic> parameters, Auth auth) {
     return RecaptchaVerifier.fromJsObject(
       auth_interop.RecaptchaVerifierJsImpl(
+        auth.jsObject,
         container,
         jsify(parameters),
-        auth.jsObject,
       ),
     );
   }

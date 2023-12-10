@@ -1,3 +1,60 @@
+## 5.8.11
+
+ - Update a dependency to the latest release.
+
+## 5.8.10
+
+ - Update a dependency to the latest release.
+
+## 5.8.9
+
+ - Update a dependency to the latest release.
+
+## 5.8.8
+
+ - **FIX**(auth,web): use the device language when using `setLanguageCode` with null ([#11905](https://github.com/firebase/flutterfire/issues/11905)). ([f9322b6f](https://github.com/firebase/flutterfire/commit/f9322b6f25cd9520c5e033361e63a4db3f375a15))
+
+## 5.8.7
+
+ - Update a dependency to the latest release.
+
+## 5.8.6
+
+ - Update a dependency to the latest release.
+
+## 5.8.5
+
+ - Update a dependency to the latest release.
+
+## 5.8.4
+
+ - Update a dependency to the latest release.
+
+## 5.8.3
+
+ - Update a dependency to the latest release.
+
+## 5.8.2
+
+ - Update a dependency to the latest release.
+
+## 5.8.1
+
+ - **FIX**(auth): deprecate `FirebaseAuth.instanceFor`'s `persistence` parameter ([#11259](https://github.com/firebase/flutterfire/issues/11259)). ([a1966e82](https://github.com/firebase/flutterfire/commit/a1966e82c15f13119cb28a262a57c67b4f2b8d3b))
+
+## 5.8.0
+
+ - **FIX**(firebase_auth): Update the position of the auth parameter for `RecaptchaVerifier` in the interop code to reflect changes in `firebase-js-sdk` ([#11514](https://github.com/firebase/flutterfire/issues/11514)). ([a836dba1](https://github.com/firebase/flutterfire/commit/a836dba186b0765745a8e81a04229fe8fd8f96b2))
+ - **FEAT**(auth): TOTP (time-based one-time password) support for multi-factor authentication ([#11420](https://github.com/firebase/flutterfire/issues/11420)). ([3cc1243c](https://github.com/firebase/flutterfire/commit/3cc1243c94368de44d3a5c4be96b905a0a37b963))
+
+## 5.7.0
+
+ - **FEAT**(auth): `revokeTokenWithAuthorizationCode()` implementation for revoking Apple sign-in token ([#11454](https://github.com/firebase/flutterfire/issues/11454)). ([92de98c9](https://github.com/firebase/flutterfire/commit/92de98c9e62f2bf20712dbfed22dd39f6883eb58))
+
+## 5.6.3
+
+ - Update a dependency to the latest release.
+
 ## 5.6.2
 
  - **FIX**(auth,web): convert `NativeError` to `FirebaseAuthError` ([#11258](https://github.com/firebase/flutterfire/issues/11258)). ([b95c3807](https://github.com/firebase/flutterfire/commit/b95c38075cd3b48395d56f3fea38e5be32b21a06))

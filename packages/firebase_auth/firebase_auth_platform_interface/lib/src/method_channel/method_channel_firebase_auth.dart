@@ -58,8 +58,8 @@ class MethodChannelFirebaseAuth extends FirebaseAuthPlatform {
     return MethodChannelFirebaseAuth._();
   }
 
-  PigeonFirebaseApp get pigeonDefault {
-    return PigeonFirebaseApp(
+  AuthPigeonFirebaseApp get pigeonDefault {
+    return AuthPigeonFirebaseApp(
       appName: app.name,
       tenantId: tenantId,
     );
@@ -189,8 +189,7 @@ class MethodChannelFirebaseAuth extends FirebaseAuthPlatform {
   ///
   /// Instances are cached and reused for incoming event handlers.
   @override
-  FirebaseAuthPlatform delegateFor(
-      {required FirebaseApp app, Persistence? persistence}) {
+  FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
     return methodChannelFirebaseAuthInstances.putIfAbsent(app.name, () {
       return MethodChannelFirebaseAuth(app: app);
     });
@@ -632,6 +631,26 @@ class MethodChannelFirebaseAuth extends FirebaseAuthPlatform {
       });
     } catch (e, stack) {
       convertPlatformException(e, stack);
+    }
+  }
+
+  @override
+  Future<void> revokeTokenWithAuthorizationCode(
+      String authorizationCode) async {
+    if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      try {
+        await _api.revokeTokenWithAuthorizationCode(
+          pigeonDefault,
+          authorizationCode,
+        );
+      } catch (e, stack) {
+        convertPlatformException(e, stack);
+      }
+    } else {
+      throw UnimplementedError(
+        'revokeTokenWithAuthorizationCode() is only available on apple platforms.',
+      );
     }
   }
 }

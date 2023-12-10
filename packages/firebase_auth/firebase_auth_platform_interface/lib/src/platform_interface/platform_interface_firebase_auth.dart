@@ -51,7 +51,6 @@ abstract class FirebaseAuthPlatform extends PlatformInterface {
   factory FirebaseAuthPlatform.instanceFor({
     required FirebaseApp app,
     required Map<dynamic, dynamic> pluginConstants,
-    Persistence? persistence,
   }) {
     var currentUser = pluginConstants['APP_CURRENT_USER'];
 
@@ -59,9 +58,7 @@ abstract class FirebaseAuthPlatform extends PlatformInterface {
       currentUser as List<Object?>;
       currentUser = PigeonUserDetails.decode(currentUser);
     }
-    return FirebaseAuthPlatform.instance
-        .delegateFor(app: app, persistence: persistence)
-        .setInitialValues(
+    return FirebaseAuthPlatform.instance.delegateFor(app: app).setInitialValues(
           languageCode: pluginConstants['APP_LANGUAGE_CODE'],
           currentUser: currentUser,
         );
@@ -89,8 +86,7 @@ abstract class FirebaseAuthPlatform extends PlatformInterface {
   ///
   /// Setting a [persistence] type is only available on web based platforms.
   @protected
-  FirebaseAuthPlatform delegateFor(
-      {required FirebaseApp app, Persistence? persistence}) {
+  FirebaseAuthPlatform delegateFor({required FirebaseApp app}) {
     throw UnimplementedError('delegateFor() is not implemented');
   }
 
@@ -661,5 +657,12 @@ abstract class FirebaseAuthPlatform extends PlatformInterface {
     @visibleForTesting String? autoRetrievedSmsCodeForTesting,
   }) {
     throw UnimplementedError('verifyPhoneNumber() is not implemented');
+  }
+
+  /// Apple only. Users signed in with Apple provider can revoke their token using an authorization code.
+  /// Authorization code can be retrieved on the user credential i.e. userCredential.additionalUserInfo.authorizationCode
+  Future<void> revokeTokenWithAuthorizationCode(String authorizationCode) {
+    throw UnimplementedError(
+        'revokeTokenWithAuthorizationCode() is not implemented');
   }
 }

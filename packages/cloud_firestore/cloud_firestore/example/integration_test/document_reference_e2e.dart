@@ -147,6 +147,9 @@ void runDocumentReferenceTests() {
           await document.update({'foo': 'baz'});
 
           await subscription.cancel();
+          await Future.delayed(
+            const Duration(seconds: 1),
+          );
         });
 
         testWidgets('listeners throws a [FirebaseException]', (_) async {
@@ -355,14 +358,14 @@ void runDocumentReferenceTests() {
           'bool_false': false,
           'map': {
             'foo': 'bar',
-            'bar': {'baz': 'ben'}
+            'bar': {'baz': 'ben'},
           },
           'list': [
             1,
             '2',
             true,
             false,
-            {'foo': 'bar'}
+            {'foo': 'bar'},
           ],
           'null': null,
           'timestamp': Timestamp.now(),
@@ -385,7 +388,7 @@ void runDocumentReferenceTests() {
           data['map'],
           equals(<String, dynamic>{
             'foo': 'bar',
-            'bar': {'baz': 'ben'}
+            'bar': {'baz': 'ben'},
           }),
         );
         expect(
@@ -395,7 +398,7 @@ void runDocumentReferenceTests() {
             '2',
             true,
             false,
-            {'foo': 'bar'}
+            {'foo': 'bar'},
           ]),
         );
         expect(data['null'], equals(null));
@@ -427,13 +430,13 @@ void runDocumentReferenceTests() {
         DocumentReference<Map<String, dynamic>> document =
             await initializeTest('document-update-field-path');
         await document.set({
-          'foo': {'bar': 'baz'}
+          'foo': {'bar': 'baz'},
         });
         DocumentSnapshot<Map<String, dynamic>> snapshot = await document.get();
         expect(
           snapshot.data(),
           equals({
-            'foo': {'bar': 'baz'}
+            'foo': {'bar': 'baz'},
           }),
         );
 
@@ -442,7 +445,7 @@ void runDocumentReferenceTests() {
         expect(
           snapshot2.data(),
           equals({
-            'foo': {'bar': 'toto'}
+            'foo': {'bar': 'toto'},
           }),
         );
       });
@@ -451,24 +454,24 @@ void runDocumentReferenceTests() {
         DocumentReference<Map<String, dynamic>> document =
             await initializeTest('document-update-field-path');
         await document.set({
-          'foo': {'bar': 'baz'}
+          'foo': {'bar': 'baz'},
         });
         DocumentSnapshot<Map<String, dynamic>> snapshot = await document.get();
         expect(
           snapshot.data(),
           equals({
-            'foo': {'bar': 'baz'}
+            'foo': {'bar': 'baz'},
           }),
         );
 
         await document.update({
-          FieldPath(const ['foo', 'bar']): 'toto'
+          FieldPath(const ['foo', 'bar']): 'toto',
         });
         DocumentSnapshot<Map<String, dynamic>> snapshot2 = await document.get();
         expect(
           snapshot2.data(),
           equals({
-            'foo': {'bar': 'toto'}
+            'foo': {'bar': 'toto'},
           }),
         );
       });
@@ -485,7 +488,7 @@ void runDocumentReferenceTests() {
         );
 
         await document.update({
-          FieldPath(const ['foo.bar']): 'toto'
+          FieldPath(const ['foo.bar']): 'toto',
         });
         DocumentSnapshot<Map<String, dynamic>> snapshot2 = await document.get();
         expect(

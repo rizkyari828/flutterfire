@@ -15,10 +15,13 @@ bool shouldUseFirestoreEmulator = false;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+  );
   if (shouldUseFirestoreEmulator) {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
+
   runApp(FirestoreExampleApp());
 }
 
@@ -112,7 +115,7 @@ class _FilmListState extends State<FilmList> {
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               },
-            )
+            ),
           ],
         ),
         actions: <Widget>[
@@ -234,7 +237,7 @@ class _MovieItem extends StatelessWidget {
           Likes(
             reference: reference,
             currentLikes: movie.likes,
-          )
+          ),
         ],
       ),
     );
@@ -278,7 +281,7 @@ class _MovieItem extends StatelessWidget {
               style: const TextStyle(color: Colors.white),
             ),
           ),
-        )
+        ),
     ];
   }
 

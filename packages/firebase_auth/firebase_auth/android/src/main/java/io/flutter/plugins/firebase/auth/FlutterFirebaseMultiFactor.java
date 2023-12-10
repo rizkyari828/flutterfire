@@ -37,7 +37,9 @@ public class FlutterFirebaseMultiFactor
   // Map an id to a MultiFactorResolver object.
   static final Map<String, MultiFactorResolver> multiFactorResolverMap = new HashMap<>();
 
-  MultiFactor getAppMultiFactor(@NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app)
+  static final Map<String, MultiFactorAssertion> multiFactorAssertionMap = new HashMap<>();
+
+  MultiFactor getAppMultiFactor(@NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app)
       throws FirebaseNoSignedInUserException {
     final FirebaseUser currentUser = FlutterFirebaseAuthUser.getCurrentUserFromPigeon(app);
     if (currentUser == null) {
@@ -57,7 +59,7 @@ public class FlutterFirebaseMultiFactor
 
   @Override
   public void enrollPhone(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.PigeonPhoneMultiFactorAssertion assertion,
       @Nullable String displayName,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
@@ -90,8 +92,39 @@ public class FlutterFirebaseMultiFactor
   }
 
   @Override
+  public void enrollTotp(
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
+      @NonNull String assertionId,
+      @Nullable String displayName,
+      @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
+    final MultiFactor multiFactor;
+    try {
+      multiFactor = getAppMultiFactor(app);
+    } catch (FirebaseNoSignedInUserException e) {
+      result.error(e);
+      return;
+    }
+
+    final MultiFactorAssertion multiFactorAssertion = multiFactorAssertionMap.get(assertionId);
+
+    assert multiFactorAssertion != null;
+    multiFactor
+        .enroll(multiFactorAssertion, displayName)
+        .addOnCompleteListener(
+            task -> {
+              if (task.isSuccessful()) {
+                result.success(null);
+              } else {
+                result.error(
+                    FlutterFirebaseAuthPluginException.parserExceptionToFlutter(
+                        task.getException()));
+              }
+            });
+  }
+
+  @Override
   public void getSession(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonMultiFactorSession>
               result) {
@@ -125,7 +158,7 @@ public class FlutterFirebaseMultiFactor
 
   @Override
   public void unenroll(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String factorUid,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
     final MultiFactor multiFactor;
@@ -152,7 +185,7 @@ public class FlutterFirebaseMultiFactor
 
   @Override
   public void getEnrolledFactors(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<
                   List<GeneratedAndroidFirebaseAuth.PigeonMultiFactorInfo>>
@@ -176,7 +209,8 @@ public class FlutterFirebaseMultiFactor
   @Override
   public void resolveSignIn(
       @NonNull String resolverId,
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonPhoneMultiFactorAssertion assertion,
+      @Nullable GeneratedAndroidFirebaseAuth.PigeonPhoneMultiFactorAssertion assertion,
+      @Nullable String totpAssertionId,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonUserCredential>
               result) {
@@ -189,11 +223,16 @@ public class FlutterFirebaseMultiFactor
       return;
     }
 
-    PhoneAuthCredential credential =
-        PhoneAuthProvider.getCredential(
-            assertion.getVerificationId(), assertion.getVerificationCode());
+    MultiFactorAssertion multiFactorAssertion;
 
-    MultiFactorAssertion multiFactorAssertion = PhoneMultiFactorGenerator.getAssertion(credential);
+    if (assertion != null) {
+      PhoneAuthCredential credential =
+          PhoneAuthProvider.getCredential(
+              assertion.getVerificationId(), assertion.getVerificationCode());
+      multiFactorAssertion = PhoneMultiFactorGenerator.getAssertion(credential);
+    } else {
+      multiFactorAssertion = multiFactorAssertionMap.get(totpAssertionId);
+    }
 
     resolver
         .resolveSignIn(multiFactorAssertion)

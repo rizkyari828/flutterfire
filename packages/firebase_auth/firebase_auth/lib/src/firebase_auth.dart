@@ -15,10 +15,6 @@ class FirebaseAuth extends FirebasePluginPlatform {
   // instance with the default app before a user specifies an app.
   FirebaseAuthPlatform? _delegatePackingProperty;
 
-  // To set "persistence" on web, it is now required on the v9.0.0 or above Firebase JS SDK to pass the value on calling `initializeAuth()`.
-  /// https://firebase.google.com/docs/reference/js/auth.md#initializeauth
-  Persistence? _persistence;
-
   /// Returns the underlying delegate implementation.
   ///
   /// If called and no [_delegatePackingProperty] exists, it will first be
@@ -27,7 +23,6 @@ class FirebaseAuth extends FirebasePluginPlatform {
     _delegatePackingProperty ??= FirebaseAuthPlatform.instanceFor(
       app: app,
       pluginConstants: pluginConstants,
-      persistence: _persistence,
     );
     return _delegatePackingProperty!;
   }
@@ -35,9 +30,8 @@ class FirebaseAuth extends FirebasePluginPlatform {
   /// The [FirebaseApp] for this current Auth instance.
   FirebaseApp app;
 
-  FirebaseAuth._({required this.app, Persistence? persistence})
-      : _persistence = persistence,
-        super(app.name, 'plugins.flutter.io/firebase_auth');
+  FirebaseAuth._({required this.app})
+      : super(app.name, 'plugins.flutter.io/firebase_auth');
 
   /// Returns an instance using the default [FirebaseApp].
   static FirebaseAuth get instance {
@@ -47,11 +41,15 @@ class FirebaseAuth extends FirebasePluginPlatform {
   }
 
   /// Returns an instance using a specified [FirebaseApp].
-  /// Note that persistence can only be used on Web and is not supported on other platforms.
-  factory FirebaseAuth.instanceFor(
-      {required FirebaseApp app, Persistence? persistence}) {
+  factory FirebaseAuth.instanceFor({
+    required FirebaseApp app,
+    @Deprecated(
+      'Will be removed in future release. Use setPersistence() instead.',
+    )
+    Persistence? persistence,
+  }) {
     return _firebaseAuthInstances.putIfAbsent(app.name, () {
-      return FirebaseAuth._(app: app, persistence: persistence);
+      return FirebaseAuth._(app: app);
     });
   }
 
@@ -364,18 +362,13 @@ class FirebaseAuth extends FirebasePluginPlatform {
     await _delegate.sendSignInLinkToEmail(email, actionCodeSettings);
   }
 
-  /// When set to null, the default Firebase Console language setting is
-  /// applied.
+  /// When set to null, sets the user-facing language code to be the default app language.
   ///
   /// The language code will propagate to email action templates (password
   /// reset, email verification and email change revocation), SMS templates for
   /// phone authentication, reCAPTCHA verifier and OAuth popup/redirect
   /// operations provided the specified providers support localization with the
   /// language code specified.
-  ///
-  /// On web platforms, if `null` is provided as the [languageCode] the Firebase
-  /// project default language will be used. On native platforms, the device
-  /// language will be used.
   Future<void> setLanguageCode(String? languageCode) {
     return _delegate.setLanguageCode(languageCode);
   }
@@ -819,6 +812,12 @@ class FirebaseAuth extends FirebasePluginPlatform {
       autoRetrievedSmsCodeForTesting: autoRetrievedSmsCodeForTesting,
       multiFactorSession: multiFactorSession,
     );
+  }
+
+  /// Apple only. Users signed in with Apple provider can revoke their token using an authorization code.
+  /// Authorization code can be retrieved on the user credential i.e. userCredential.additionalUserInfo.authorizationCode
+  Future<void> revokeTokenWithAuthorizationCode(String authorizationCode) {
+    return _delegate.revokeTokenWithAuthorizationCode(authorizationCode);
   }
 
   @override

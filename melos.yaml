@@ -16,13 +16,6 @@ command:
     # Additionally build a changelog at the root of the workspace.
     workspaceChangelog: true
 
-    changelogs:
-      - path: firebase_ui_changelog.md
-        packageFilters:
-          scope: firebase_ui_*
-        description: |
-          All notable changes for firebase_ui packages
-
   bootstrap:
     # It seems so that running "pub get" in parallel has some issues (like
     # https://github.com/dart-lang/pub/issues/3404). Disabling this feature
@@ -167,7 +160,7 @@ scripts:
   test:e2e:cloud_firestore:
     run: |
       cd packages/cloud_firestore/cloud_firestore/example
-      flutter test integration_test/cloud_firestore_e2e_test.dart
+      flutter test integration_test/e2e_test.dart
     description: |
       Run all e2e tests for cloud_firestore.
 
@@ -221,6 +214,7 @@ scripts:
     run: |
       melos exec -- "flutter pub run pigeon --input ./pigeons/messages.dart" && \
       melos run generate:pigeon:macos --no-select && \
+      melos run generate:pigeon:android --no-select && \
       melos run format --no-select
     packageFilters:
       fileExists: 'pigeons/messages.dart'
@@ -232,6 +226,14 @@ scripts:
     packageFilters:
       fileExists: 'ios/Classes/messages.g.m'
     description: Pigeon does not add the condition to import Flutter or FlutterMacOs. Add the condition
+
+  generate:pigeon:android:
+    run: |
+      melos exec -- "find ./android -type f -name '*Generated*' | xargs sed -i '.bak' 's/ArrayList<Object> toList() {/public ArrayList<Object> toList() {/g'" && \
+      melos exec -- "find ./android -type f -name '*.bak' -delete"
+    packageFilters:
+      dirExists: 'android'
+    description: Transform the method toList() into a public one to be used in EventChannel
 
   odm:test:
     run: |

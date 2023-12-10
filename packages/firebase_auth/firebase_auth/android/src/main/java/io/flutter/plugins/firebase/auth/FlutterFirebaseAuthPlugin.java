@@ -29,6 +29,7 @@ import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.StreamHandler;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugins.firebase.core.FlutterFirebaseCorePlugin;
 import io.flutter.plugins.firebase.core.FlutterFirebasePlugin;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,10 @@ public class FlutterFirebaseAuthPlugin
   private final FlutterFirebaseAuthUser firebaseAuthUser = new FlutterFirebaseAuthUser();
   private final FlutterFirebaseMultiFactor firebaseMultiFactor = new FlutterFirebaseMultiFactor();
 
+  private final FlutterFirebaseTotpMultiFactor firebaseTotpMultiFactor =
+      new FlutterFirebaseTotpMultiFactor();
+  private final FlutterFirebaseTotpSecret firebaseTotpSecret = new FlutterFirebaseTotpSecret();
+
   private void initInstance(BinaryMessenger messenger) {
     registerPlugin(METHOD_CHANNEL_NAME, this);
     channel = new MethodChannel(messenger, METHOD_CHANNEL_NAME);
@@ -64,6 +69,8 @@ public class FlutterFirebaseAuthPlugin
     GeneratedAndroidFirebaseAuth.FirebaseAuthUserHostApi.setup(messenger, firebaseAuthUser);
     GeneratedAndroidFirebaseAuth.MultiFactorUserHostApi.setup(messenger, firebaseMultiFactor);
     GeneratedAndroidFirebaseAuth.MultiFactoResolverHostApi.setup(messenger, firebaseMultiFactor);
+    GeneratedAndroidFirebaseAuth.MultiFactorTotpHostApi.setup(messenger, firebaseTotpMultiFactor);
+    GeneratedAndroidFirebaseAuth.MultiFactorTotpSecretHostApi.setup(messenger, firebaseTotpSecret);
 
     this.messenger = messenger;
   }
@@ -82,6 +89,8 @@ public class FlutterFirebaseAuthPlugin
     GeneratedAndroidFirebaseAuth.FirebaseAuthUserHostApi.setup(messenger, null);
     GeneratedAndroidFirebaseAuth.MultiFactorUserHostApi.setup(messenger, null);
     GeneratedAndroidFirebaseAuth.MultiFactoResolverHostApi.setup(messenger, null);
+    GeneratedAndroidFirebaseAuth.MultiFactorTotpHostApi.setup(messenger, null);
+    GeneratedAndroidFirebaseAuth.MultiFactorTotpSecretHostApi.setup(messenger, null);
 
     channel = null;
     messenger = null;
@@ -119,18 +128,24 @@ public class FlutterFirebaseAuthPlugin
     return activity;
   }
 
-  static FirebaseAuth getAuthFromPigeon(GeneratedAndroidFirebaseAuth.PigeonFirebaseApp pigeonApp) {
+  static FirebaseAuth getAuthFromPigeon(
+      GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp pigeonApp) {
     FirebaseApp app = FirebaseApp.getInstance(pigeonApp.getAppName());
     FirebaseAuth auth = FirebaseAuth.getInstance(app);
     if (pigeonApp.getTenantId() != null) {
       auth.setTenantId(pigeonApp.getTenantId());
     }
+    String customDomain = FlutterFirebaseCorePlugin.customAuthDomain.get(pigeonApp.getAppName());
+    if (customDomain != null) {
+      auth.setCustomAuthDomain(customDomain);
+    }
+
     return auth;
   }
 
   @Override
   public void registerIdTokenListener(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.Result<String> result) {
     try {
       final FirebaseAuth auth = getAuthFromPigeon(app);
@@ -147,7 +162,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void registerAuthStateListener(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.Result<String> result) {
     try {
       final FirebaseAuth auth = getAuthFromPigeon(app);
@@ -164,7 +179,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void useEmulator(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String host,
       @NonNull Long port,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
@@ -179,7 +194,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void applyActionCode(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String code,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
     FirebaseAuth firebaseAuth = getAuthFromPigeon(app);
@@ -199,7 +214,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void checkActionCode(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String code,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonActionCodeInfo>
@@ -222,7 +237,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void confirmPasswordReset(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String code,
       @NonNull String newPassword,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
@@ -244,7 +259,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void createUserWithEmailAndPassword(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String email,
       @NonNull String password,
       @NonNull
@@ -269,7 +284,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signInAnonymously(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonUserCredential>
               result) {
@@ -291,7 +306,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signInWithCredential(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull Map<String, Object> input,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonUserCredential>
@@ -319,7 +334,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signInWithCustomToken(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String token,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonUserCredential>
@@ -343,7 +358,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signInWithEmailAndPassword(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String email,
       @NonNull String password,
       @NonNull
@@ -366,7 +381,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signInWithEmailLink(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String email,
       @NonNull String emailLink,
       @NonNull
@@ -390,7 +405,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signInWithProvider(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.PigeonSignInProvider signInProvider,
       @NonNull
           GeneratedAndroidFirebaseAuth.Result<GeneratedAndroidFirebaseAuth.PigeonUserCredential>
@@ -422,7 +437,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void signOut(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
     try {
       FirebaseAuth firebaseAuth = getAuthFromPigeon(app);
@@ -435,7 +450,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void fetchSignInMethodsForEmail(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String email,
       @NonNull GeneratedAndroidFirebaseAuth.Result<List<String>> result) {
     FirebaseAuth firebaseAuth = getAuthFromPigeon(app);
@@ -457,7 +472,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void sendPasswordResetEmail(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String email,
       @Nullable GeneratedAndroidFirebaseAuth.PigeonActionCodeSettings actionCodeSettings,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
@@ -495,7 +510,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void sendSignInLinkToEmail(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String email,
       @NonNull GeneratedAndroidFirebaseAuth.PigeonActionCodeSettings actionCodeSettings,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
@@ -517,7 +532,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void setLanguageCode(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @Nullable String languageCode,
       @NonNull GeneratedAndroidFirebaseAuth.Result<String> result) {
     try {
@@ -537,7 +552,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void setSettings(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseAuthSettings settings,
       @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
     try {
@@ -568,7 +583,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void verifyPasswordResetCode(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull String code,
       @NonNull GeneratedAndroidFirebaseAuth.Result<String> result) {
     FirebaseAuth firebaseAuth = getAuthFromPigeon(app);
@@ -589,7 +604,7 @@ public class FlutterFirebaseAuthPlugin
 
   @Override
   public void verifyPhoneNumber(
-      @NonNull GeneratedAndroidFirebaseAuth.PigeonFirebaseApp app,
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
       @NonNull GeneratedAndroidFirebaseAuth.PigeonVerifyPhoneNumberRequest request,
       @NonNull GeneratedAndroidFirebaseAuth.Result<String> result) {
     try {
@@ -637,6 +652,14 @@ public class FlutterFirebaseAuthPlugin
     } catch (Exception e) {
       result.error(e);
     }
+  }
+
+  @Override
+  public void revokeTokenWithAuthorizationCode(
+      @NonNull GeneratedAndroidFirebaseAuth.AuthPigeonFirebaseApp app,
+      @NonNull String authorizationCode,
+      @NonNull GeneratedAndroidFirebaseAuth.Result<Void> result) {
+    // Should never get here as we throw Exception on Dart side.
   }
 
   @Override

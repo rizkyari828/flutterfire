@@ -36,25 +36,25 @@ import java.util.Objects;
 class FlutterFirebaseFirestoreMessageCodec extends StandardMessageCodec {
   public static final FlutterFirebaseFirestoreMessageCodec INSTANCE =
       new FlutterFirebaseFirestoreMessageCodec();
-  private static final byte DATA_TYPE_DATE_TIME = (byte) 128;
-  private static final byte DATA_TYPE_GEO_POINT = (byte) 129;
-  private static final byte DATA_TYPE_DOCUMENT_REFERENCE = (byte) 130;
-  private static final byte DATA_TYPE_BLOB = (byte) 131;
-  private static final byte DATA_TYPE_ARRAY_UNION = (byte) 132;
-  private static final byte DATA_TYPE_ARRAY_REMOVE = (byte) 133;
-  private static final byte DATA_TYPE_DELETE = (byte) 134;
-  private static final byte DATA_TYPE_SERVER_TIMESTAMP = (byte) 135;
-  private static final byte DATA_TYPE_TIMESTAMP = (byte) 136;
-  private static final byte DATA_TYPE_INCREMENT_DOUBLE = (byte) 137;
-  private static final byte DATA_TYPE_INCREMENT_INTEGER = (byte) 138;
-  private static final byte DATA_TYPE_DOCUMENT_ID = (byte) 139;
-  private static final byte DATA_TYPE_FIELD_PATH = (byte) 140;
-  private static final byte DATA_TYPE_NAN = (byte) 141;
-  private static final byte DATA_TYPE_INFINITY = (byte) 142;
-  private static final byte DATA_TYPE_NEGATIVE_INFINITY = (byte) 143;
-  private static final byte DATA_TYPE_FIRESTORE_INSTANCE = (byte) 144;
-  private static final byte DATA_TYPE_FIRESTORE_QUERY = (byte) 145;
-  private static final byte DATA_TYPE_FIRESTORE_SETTINGS = (byte) 146;
+  private static final byte DATA_TYPE_DATE_TIME = (byte) 180;
+  private static final byte DATA_TYPE_GEO_POINT = (byte) 181;
+  private static final byte DATA_TYPE_DOCUMENT_REFERENCE = (byte) 182;
+  private static final byte DATA_TYPE_BLOB = (byte) 183;
+  private static final byte DATA_TYPE_ARRAY_UNION = (byte) 184;
+  private static final byte DATA_TYPE_ARRAY_REMOVE = (byte) 185;
+  private static final byte DATA_TYPE_DELETE = (byte) 186;
+  private static final byte DATA_TYPE_SERVER_TIMESTAMP = (byte) 187;
+  private static final byte DATA_TYPE_TIMESTAMP = (byte) 188;
+  private static final byte DATA_TYPE_INCREMENT_DOUBLE = (byte) 189;
+  private static final byte DATA_TYPE_INCREMENT_INTEGER = (byte) 190;
+  private static final byte DATA_TYPE_DOCUMENT_ID = (byte) 191;
+  private static final byte DATA_TYPE_FIELD_PATH = (byte) 192;
+  private static final byte DATA_TYPE_NAN = (byte) 193;
+  private static final byte DATA_TYPE_INFINITY = (byte) 194;
+  private static final byte DATA_TYPE_NEGATIVE_INFINITY = (byte) 195;
+  private static final byte DATA_TYPE_FIRESTORE_INSTANCE = (byte) 196;
+  private static final byte DATA_TYPE_FIRESTORE_QUERY = (byte) 197;
+  private static final byte DATA_TYPE_FIRESTORE_SETTINGS = (byte) 198;
 
   @Override
   protected void writeValue(ByteArrayOutputStream stream, Object value) {
@@ -72,8 +72,18 @@ class FlutterFirebaseFirestoreMessageCodec extends StandardMessageCodec {
       writeDouble(stream, ((GeoPoint) value).getLongitude());
     } else if (value instanceof DocumentReference) {
       stream.write(DATA_TYPE_DOCUMENT_REFERENCE);
-      writeValue(stream, ((DocumentReference) value).getFirestore().getApp().getName());
+      FirebaseFirestore firestore = ((DocumentReference) value).getFirestore();
+      String appName = firestore.getApp().getName();
+      writeValue(stream, appName);
       writeValue(stream, ((DocumentReference) value).getPath());
+      String databaseURL;
+      // There is no way of getting database URL from Firebase android SDK API so we cache it ourselves
+      synchronized (FlutterFirebaseFirestorePlugin.firestoreInstanceCache) {
+        databaseURL =
+            FlutterFirebaseFirestorePlugin.getCachedFirebaseFirestoreInstanceForKey(firestore)
+                .getDatabaseURL();
+      }
+      writeValue(stream, databaseURL);
     } else if (value instanceof DocumentSnapshot) {
       writeDocumentSnapshot(stream, (DocumentSnapshot) value);
     } else if (value instanceof QuerySnapshot) {
@@ -277,20 +287,22 @@ class FlutterFirebaseFirestoreMessageCodec extends StandardMessageCodec {
 
   private FirebaseFirestore readFirestoreInstance(ByteBuffer buffer) {
     String appName = (String) readValue(buffer);
+    String databaseURL = (String) readValue(buffer);
     FirebaseFirestoreSettings settings = (FirebaseFirestoreSettings) readValue(buffer);
-
     synchronized (FlutterFirebaseFirestorePlugin.firestoreInstanceCache) {
-      if (FlutterFirebaseFirestorePlugin.getCachedFirebaseFirestoreInstanceForKey(appName)
+      if (FlutterFirebaseFirestorePlugin.getFirestoreInstanceByNameAndDatabaseUrl(
+              appName, databaseURL)
           != null) {
-        return FlutterFirebaseFirestorePlugin.getCachedFirebaseFirestoreInstanceForKey(appName);
+        return FlutterFirebaseFirestorePlugin.getFirestoreInstanceByNameAndDatabaseUrl(
+            appName, databaseURL);
       }
 
       FirebaseApp app = FirebaseApp.getInstance(appName);
-      FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-
+      FirebaseFirestore firestore = FirebaseFirestore.getInstance(app, databaseURL);
       firestore.setFirestoreSettings(settings);
 
-      FlutterFirebaseFirestorePlugin.setCachedFirebaseFirestoreInstanceForKey(firestore, appName);
+      FlutterFirebaseFirestorePlugin.setCachedFirebaseFirestoreInstanceForKey(
+          firestore, databaseURL);
       return firestore;
     }
   }

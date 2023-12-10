@@ -2,16 +2,18 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-#import "PigeonParser.h"
+#import "Private/PigeonParser.h"
 #import <Foundation/Foundation.h>
 
 @implementation PigeonParser
 
-+ (PigeonUserCredential *)getPigeonUserCredentialFromAuthResult:
-    (nonnull FIRAuthDataResult *)authResult {
++ (PigeonUserCredential *)
+    getPigeonUserCredentialFromAuthResult:(nonnull FIRAuthDataResult *)authResult
+                        authorizationCode:(nullable NSString *)authorizationCode {
   return [PigeonUserCredential
             makeWithUser:[self getPigeonDetails:authResult.user]
-      additionalUserInfo:[self getPigeonAdditionalUserInfo:authResult.additionalUserInfo]
+      additionalUserInfo:[self getPigeonAdditionalUserInfo:authResult.additionalUserInfo
+                                         authorizationCode:authorizationCode]
               credential:[self getPigeonAuthCredential:authResult.credential]];
 }
 
@@ -68,12 +70,21 @@
   return [dataArray copy];
 }
 
-+ (PigeonAdditionalUserInfo *)getPigeonAdditionalUserInfo:
-    (nonnull FIRAdditionalUserInfo *)userInfo {
++ (PigeonAdditionalUserInfo *)getPigeonAdditionalUserInfo:(nonnull FIRAdditionalUserInfo *)userInfo
+                                        authorizationCode:(nullable NSString *)authorizationCode {
   return [PigeonAdditionalUserInfo makeWithIsNewUser:[NSNumber numberWithBool:userInfo.isNewUser]
                                           providerId:userInfo.providerID
                                             username:userInfo.username
+                                   authorizationCode:authorizationCode
                                              profile:userInfo.profile];
+}
+
++ (PigeonTotpSecret *)getPigeonTotpSecret:(FIRTOTPSecret *)secret {
+  return [PigeonTotpSecret makeWithCodeIntervalSeconds:nil
+                                            codeLength:nil
+                          enrollmentCompletionDeadline:nil
+                                      hashingAlgorithm:nil
+                                             secretKey:secret.sharedSecretKey];
 }
 
 + (PigeonAuthCredential *)getPigeonAuthCredential:(FIRAuthCredential *)authCredential {

@@ -101,7 +101,7 @@ class QueryWeb extends QueryPlatform {
 
     if (parameters['filters'] != null) {
       final Map<String, Object?> filter = parameters['filters']!;
-      return query.filterWith(filter);
+      query = query.filterWith(filter);
     }
 
     for (final List<dynamic> condition in parameters['where']) {
@@ -156,9 +156,7 @@ class QueryWeb extends QueryPlatform {
       return convertWebQuerySnapshot(
         firestore,
         await _buildWebQueryWithParameters().get(convertGetOptions(options)),
-        getServerTimestampBehaviorString(
-          options.serverTimestampBehavior,
-        ),
+        options.serverTimestampBehavior,
       );
     });
   }
@@ -195,7 +193,7 @@ class QueryWeb extends QueryPlatform {
         return convertWebQuerySnapshot(
           firestore,
           webQuerySnapshot,
-          ServerTimestampBehavior.none.name,
+          ServerTimestampBehavior.none,
         );
       }),
     );
@@ -249,7 +247,7 @@ class QueryWeb extends QueryPlatform {
   }
 
   @override
-  QueryPlatform whereFilter(Filter filter) {
+  QueryPlatform whereFilter(FilterPlatformInterface filter) {
     return _copyWithParameters(<String, dynamic>{
       'filters': filter.toJson(),
     });

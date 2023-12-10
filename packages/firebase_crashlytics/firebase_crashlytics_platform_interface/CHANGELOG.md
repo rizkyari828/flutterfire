@@ -1,3 +1,51 @@
+## 3.6.16
+
+ - Update a dependency to the latest release.
+
+## 3.6.15
+
+ - Update a dependency to the latest release.
+
+## 3.6.14
+
+ - Update a dependency to the latest release.
+
+## 3.6.13
+
+ - Update a dependency to the latest release.
+
+## 3.6.12
+
+ - Update a dependency to the latest release.
+
+## 3.6.11
+
+ - Update a dependency to the latest release.
+
+## 3.6.10
+
+ - Update a dependency to the latest release.
+
+## 3.6.9
+
+ - Update a dependency to the latest release.
+
+## 3.6.8
+
+ - Update a dependency to the latest release.
+
+## 3.6.7
+
+ - Update a dependency to the latest release.
+
+## 3.6.6
+
+ - Update a dependency to the latest release.
+
+## 3.6.5
+
+ - Update a dependency to the latest release.
+
 ## 3.6.4
 
  - Update a dependency to the latest release.
