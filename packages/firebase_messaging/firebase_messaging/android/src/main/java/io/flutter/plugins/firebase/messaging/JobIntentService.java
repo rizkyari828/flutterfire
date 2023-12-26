@@ -15,7 +15,7 @@ import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTaskExecutorService;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
