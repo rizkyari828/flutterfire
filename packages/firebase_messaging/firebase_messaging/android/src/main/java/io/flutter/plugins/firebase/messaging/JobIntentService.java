@@ -15,7 +15,7 @@ import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.os.AsyncTaskExecutorService;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -342,7 +342,7 @@ abstract class JobIntentService extends Service {
   }
 
   /** This is a task to dequeue and process work in the background. */
-  final class CommandProcessor extends AsyncTask<Void, Void, Void> {
+  final class CommandProcessor extends AsyncTaskExecutorService<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
       GenericWorkItem work;
@@ -571,7 +571,7 @@ abstract class JobIntentService extends Service {
         mCompatWorkEnqueuer.serviceProcessingStarted();
       }
       if (DEBUG) Log.d(TAG, "Starting processor: " + mCurProcessor);
-      mCurProcessor.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      mCurProcessor.executeOnExecutor(AsyncTaskExecutorService.THREAD_POOL_EXECUTOR);
     }
   }
 
