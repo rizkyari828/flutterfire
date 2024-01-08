@@ -112,7 +112,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
    *       resolve to a Dart callback then this method does nothing.
    * </ul>
    */
-   public void startBackgroundIsolate() {
+  public void startBackgroundIsolate() {
     if (isNotRunning()) {
       try {
         long callbackHandle = getPluginCallbackHandle();
@@ -161,47 +161,47 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
               mainHandler,
               () -> {
                 try {
-                String appBundlePath = loader.findAppBundlePath();
-                AssetManager assets = ContextHolder.getApplicationContext().getAssets();
-                if (isNotRunning()) {
-                  if (shellArgs != null) {
-                    Log.i(
-                        TAG,
-                        "Creating background FlutterEngine instance, with args: "
-                            + Arrays.toString(shellArgs.toArray()));
-                    backgroundFlutterEngine =
-                        new FlutterEngine(
-                            ContextHolder.getApplicationContext(), shellArgs.toArray());
-                  } else {
-                    Log.i(TAG, "Creating background FlutterEngine instance.");
-                    backgroundFlutterEngine =
-                        new FlutterEngine(ContextHolder.getApplicationContext());
-                  }
-                  // We need to create an instance of `FlutterEngine` before looking up the
-                  // callback. If we don't, the callback cache won't be initialized and the
-                  // lookup will fail.
-                  FlutterCallbackInformation flutterCallback =
-                      FlutterCallbackInformation.lookupCallbackInformation(callbackHandle);
-                  DartExecutor executor = backgroundFlutterEngine.getDartExecutor();
-                  initializeMethodChannel(executor);
+                  String appBundlePath = loader.findAppBundlePath();
+                  AssetManager assets = ContextHolder.getApplicationContext().getAssets();
+                  if (isNotRunning()) {
+                    if (shellArgs != null) {
+                      Log.i(
+                          TAG,
+                          "Creating background FlutterEngine instance, with args: "
+                              + Arrays.toString(shellArgs.toArray()));
+                      backgroundFlutterEngine =
+                          new FlutterEngine(
+                              ContextHolder.getApplicationContext(), shellArgs.toArray());
+                    } else {
+                      Log.i(TAG, "Creating background FlutterEngine instance.");
+                      backgroundFlutterEngine =
+                          new FlutterEngine(ContextHolder.getApplicationContext());
+                    }
+                    // We need to create an instance of `FlutterEngine` before looking up the
+                    // callback. If we don't, the callback cache won't be initialized and the
+                    // lookup will fail.
+                    FlutterCallbackInformation flutterCallback =
+                        FlutterCallbackInformation.lookupCallbackInformation(callbackHandle);
+                    DartExecutor executor = backgroundFlutterEngine.getDartExecutor();
+                    initializeMethodChannel(executor);
 
-                  if (appBundlePath == null) {
-                    // appBundlePath is possibly "null", this will allow us to fallback to the alternative lookup method.
-                    // See: https://github.com/firebase/flutterfire/issues/9345#issuecomment-1467601511
-                    Log.w(
-                        TAG,
-                        "startBackgroundIsolate: 'appBundlePath' was null, using alternative lookup method.");
-                    appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath();
-                  }
-                  DartCallback dartCallback =
-                      new DartCallback(assets, appBundlePath, flutterCallback);
+                    if (appBundlePath == null) {
+                      // appBundlePath is possibly "null", this will allow us to fallback to the alternative lookup method.
+                      // See: https://github.com/firebase/flutterfire/issues/9345#issuecomment-1467601511
+                      Log.w(
+                          TAG,
+                          "startBackgroundIsolate: 'appBundlePath' was null, using alternative lookup method.");
+                      appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath();
+                    }
+                    DartCallback dartCallback =
+                        new DartCallback(assets, appBundlePath, flutterCallback);
 
-                  executor.executeDartCallback(dartCallback);
+                    executor.executeDartCallback(dartCallback);
+                  }
+                } catch (Exception exception) {
+                  Log.e(TAG, "Start Background Isolate Error", exception);
                 }
-              } catch (Exception exception) {
-                Log.e(TAG, "Start Background Isolate Error", exception);
-              }
-            });
+              });
         };
     mainHandler.post(myRunnable);
   }
